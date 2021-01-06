@@ -27,11 +27,11 @@
           color="success"
           :rules="rulesC"
           maxlength="8"
+          @keyup.enter="getCEP"
           clearable>
         </v-text-field>
       </v-col>
     </v-row>
-
     <v-row v-else class="text-center" justify="center">
       <v-col cols="12" lg='2' md="2" sm="12" align="center">
         <v-text-field
@@ -60,11 +60,11 @@
           :rules="rulesE"
           color="success"
           maxlength="80"
+          @keyup.enter="getCEP"
           clearable>
         </v-text-field>
       </v-col>
     </v-row>
-
      <!-- Botão Pesquisar -->
     <v-row class="text-center" justify="center">
       <v-col cols="12" md="12" sm="12" align="center">
@@ -78,11 +78,11 @@
         </v-btn>
       </v-col>
     </v-row>
-
   </v-container>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
   export default {
     name: 'Pesquisa',
 
@@ -102,13 +102,14 @@
         value => !!value || 'É preciso informar este campo.',
         value => (value && value.length >= 3) || 'Mínimo 3 caracteres',
       ],
-
       buscaCep: '',
       uf: '',
       cidade: '',
       logradouro: '',
-      desserts: [],
     }),
+    computed:{
+      ...mapGetters(['dessertsA'])
+    },
     watch: {
       cep(){
         if(this.cep === true){
@@ -126,24 +127,40 @@
       }
     },
     methods: {
+      ...mapActions(['setstatusDesserts', 'setstatusClean']),
       async getCEP(){
         this.loading = true
+        this.desserts = []
             try{
               if(this.cep === true){
                 const response = await this.$http.get(this.buscaCep+'/json/')
-                this.desserts = response.data
-                console.log(this.desserts) //RETIRAR DO CÓDIGO
+                this.desserts.push(response.data)
               }
               else{
-                const response = await this.$http.get(this.uf+'/'+this.cidade+'/'+this.logradouro+'/json/')
-                this.desserts = response.data
-                console.log(this.desserts)
+                const response = await this.$http.get(this.uf+'/'+this.cidade+'/'+this.logradouro+'/json/')     
+                for (var i = 0; i <= response.data.length; i++) {
+                  this.desserts.push({
+                    'localidade': response.data[i].localidade,
+                    'uf': response.data[i].uf,
+                    'bairro': response.data[i].bairro,
+                    'logradouro': response.data[i].logradouro,
+                    'cep': response.data[i].cep,
+                    'complemento': response.data[i].complemento,
+                  })
+                }
               }
             }catch(error) {
                 console.error(error)
+                alert("Ocorreu um erro, por favor tente novamente!")
             }finally{
               this.loading = false
+              this.setstatusDesserts(this.desserts)
+              this.setstatusClean(true) 
             }
+            this.uf = ''
+            this.cidade = ''
+            this.logradouro = ''
+            this.buscaCep = ''
         },
     },
     created() {

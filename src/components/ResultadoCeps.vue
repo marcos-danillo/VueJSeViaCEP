@@ -1,78 +1,65 @@
 <template>
      <v-container>
-         <v-divider class="mb-6"></v-divider>
-        <v-data-table
-            :headers="headers"
-            :items="desserts"
-            :items-per-page="5"
-            item-key="name"
-            class="elevation-1"
-            :footer-props="{
-            showFirstLastPage: true,
-            firstIcon: 'mdi-arrow-collapse-left',
-            lastIcon: 'mdi-arrow-collapse-right',
-            prevIcon: 'mdi-minus',
-            nextIcon: 'mdi-plus'
-            }"
-        ></v-data-table>
+        <v-row v-if="getstatusClean" class="text-center" justify="center">
+            <v-col cols="12" md="12" sm="12" align="center">
+                <v-toolbar
+                    flat
+                >
+                    <v-toolbar-title>RESULTADO DA BUSCA</v-toolbar-title>
+                    <v-divider
+                    class="mx-4"
+                    inset
+                    vertical
+                    ></v-divider>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                    color="error"
+                    dark
+                    class="mb-2"
+                    @click="limparResultados"
+                    >
+                    Limpar Resultados
+                    </v-btn>
+                </v-toolbar>
+                <v-data-table
+                    :headers="headers"
+                    :items="ceps"
+                    class="elevation-1"
+                >
+                </v-data-table>
+            </v-col>
+        </v-row>
      </v-container>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
   export default {
     data () {
       return {
         headers: [
           {
-            text: 'Dessert (100g serving)',
+            text: 'Cidade',
             align: 'start',
-            value: 'name',
+            value: 'localidade',
           },
-          { text: 'Category', value: 'category' },
-        ],
-        desserts: [
-          {
-            name: 'Frozen Yogurt',
-            category: 'Ice cream',
-          },
-          {
-            name: 'Ice cream sandwich',
-            category: 'Ice cream',
-          },
-          {
-            name: 'Eclair',
-            category: 'Cookie',
-          },
-          {
-            name: 'Cupcake',
-            category: 'Pastry',
-          },
-          {
-            name: 'Gingerbread',
-            category: 'Cookie',
-          },
-          {
-            name: 'Jelly bean',
-            category: 'Candy',
-          },
-          {
-            name: 'Lollipop',
-            category: 'Candy',
-          },
-          {
-            name: 'Honeycomb',
-            category: 'Toffee',
-          },
-          {
-            name: 'Donut',
-            category: 'Pastry',
-          },
-          {
-            name: 'KitKat',
-            category: 'Candy',
-          },
+          { text: 'UF', value: 'uf' },
+          { text: 'Bairro', value: 'bairro' },
+          { text: 'Logradouro', value: 'logradouro' },
+          { text: 'CEP', value: 'cep' },
+          { text: 'Complemento', value: 'complemento'}
         ],
       }
+    },
+    computed: {
+        ...mapGetters(['ceps','getstatusClean'])
+    },
+    methods:{
+        ...mapActions(['setstatusDesserts', 'setstatusClean']),
+        limparResultados(){
+            this.setstatusDesserts([])
+            this.setstatusClean(false) 
+        }
     },
   }
 </script>

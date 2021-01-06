@@ -133,25 +133,39 @@ import { mapGetters, mapActions } from 'vuex'
         this.desserts = []
             try{
               if(this.cep === true){
-                const response = await this.$http.get(this.buscaCep+'/json/')
-                this.desserts.push(response.data)
+                if(this.buscaCep === ''){
+                  alert('Informe um argumento para pesquisa!')
+                }
+                else{
+                  const response = await this.$http.get(this.buscaCep+'/json/')
+                  this.desserts.push(response.data)
+                }
               }
               else{
-                const response = await this.$http.get(this.uf+'/'+this.cidade+'/'+this.logradouro+'/json/')     
-                for (var i = 0; i <= response.data.length; i++) {
-                  this.desserts.push({
-                    'localidade': response.data[i].localidade,
-                    'uf': response.data[i].uf,
-                    'bairro': response.data[i].bairro,
-                    'logradouro': response.data[i].logradouro,
-                    'cep': response.data[i].cep,
-                    'complemento': response.data[i].complemento,
-                  })
+                if(this.uf === '' || this.cidade === '' || this.logradouro === ''){
+                  alert('Informe todos os campos para realizar a pesquisa!')
+                }
+                if(this.uf != '' || this.cidade != '' || this.logradouro != ''){
+                  const response = await this.$http.get(this.uf+'/'+this.cidade+'/'+this.logradouro+'/json/')     
+                  for (var i = 0; i <= response.data.length; i++) {
+                    this.desserts.push({
+                      'localidade': response.data[i].localidade,
+                      'uf': response.data[i].uf,
+                      'bairro': response.data[i].bairro,
+                      'logradouro': response.data[i].logradouro,
+                      'cep': response.data[i].cep,
+                      'complemento': response.data[i].complemento,
+                    })
+                  }
                 }
               }
             }catch(error) {
-                console.error(error)
-                alert("Ocorreu um erro, por favor tente novamente!")
+                if (error instanceof TypeError){
+                  // 
+                }
+                else{
+                  alert('Erro Inesperado! Tente novamente.')
+                }
             }finally{
               this.loading = false
               this.setstatusDesserts(this.desserts)
